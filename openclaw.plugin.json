@@ -1,0 +1,18 @@
+{
+  "id": "agent-acl",
+  "name": "Agent Tool ACL",
+  "description": "Restricts MCP server tool access per agent via a JSON allowlist.",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "aclPath": {
+        "type": "string",
+        "description": "Absolute path to acl.json. Defaults to acl.json in the installed plugin root."
+      }
+    },
+    "additionalProperties": false
+  },
+  "contracts": {
+    "trustedToolPolicies": ["agent-acl"]
+  }
+}

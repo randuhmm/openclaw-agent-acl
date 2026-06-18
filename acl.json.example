@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "mealie": {
+      "allowAgents": ["family-chef"]
+    },
+    "ha-mcp": {
+      "allowAgents": ["main", "jonny-assistant"]
+    }
+  }
+}

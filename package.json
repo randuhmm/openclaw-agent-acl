@@ -1,0 +1,30 @@
+{
+  "name": "@randuhmm/openclaw-agent-acl",
+  "version": "1.0.0",
+  "description": "Per-agent MCP tool access control for OpenClaw",
+  "type": "module",
+  "scripts": {
+    "plugin:build": "openclaw plugins build --entry ./index.ts --check",
+    "plugin:validate": "clawhub package validate .",
+    "typecheck": "tsc --noEmit"
+  },
+  "openclaw": {
+    "extensions": ["./index.ts"],
+    "compat": {
+      "pluginApi": ">=2026.3.24-beta.2",
+      "minGatewayVersion": "2026.3.24-beta.2"
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=22.19"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/randuhmm/openclaw-agent-acl"
+  },
+  "license": "MIT",
+  "keywords": ["openclaw", "openclaw-plugin", "mcp", "acl", "agent", "tool-policy"]
+}
