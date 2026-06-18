@@ -80,7 +80,8 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+# dist is committed so git: installs work without a separate build step
+# dist
 .output
 
 # Gatsby files
