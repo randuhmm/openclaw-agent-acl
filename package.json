@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsup index.ts --format esm --outDir dist --external openclaw --external node:fs --external node:path",
-    "plugin:build": "npm run build && openclaw plugins build --entry ./dist/index.js --check",
+    "plugin:build": "npm run build",
     "plugin:validate": "clawhub package validate .",
     "typecheck": "tsc --noEmit"
   },

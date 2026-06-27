@@ -18,10 +18,13 @@ jobs:
 
       - run: npm ci
 
+      - name: Install clawhub CLI
+        run: npm install -g clawhub
+
       - name: Type check
         run: npx tsc --noEmit
 
-      - name: Build & validate plugin entry
+      - name: Build plugin
         run: npm run plugin:build
 
       - name: Validate manifest

@@ -24,8 +24,14 @@ jobs:
 
       - run: npm ci
 
+      - name: Install clawhub CLI
+        run: npm install -g clawhub
+
       - name: Build plugin
-        run: npm run plugin:build
+        run: npm run build
+
+      - name: Validate plugin package
+        run: clawhub package validate .
 
       - name: Publish to ClawHub
         run: clawhub package publish randuhmm/openclaw-agent-acl
