@@ -33,11 +33,13 @@ jobs:
       - name: Validate plugin package
         run: clawhub package validate .
 
+      - name: Authenticate clawhub
+        run: clawhub login --token "$CLAWHUB_TOKEN"
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+
       - name: Publish to ClawHub
         run: clawhub package publish randuhmm/openclaw-agent-acl
-        env:
-          # Not required for workflow_dispatch after trusted-publisher is configured
-          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
 
       - name: Publish to npm
         run: npm publish --access public
