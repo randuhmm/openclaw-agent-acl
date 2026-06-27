@@ -1,10 +1,13 @@
 {
   "servers": {
-    "mealie": {
-      "allowAgents": ["family-chef"]
+    "calendar-mcp": {
+      "allowAgents": ["my-assistant"]
     },
-    "ha-mcp": {
-      "allowAgents": ["main", "jonny-assistant"]
+    "smart-home": {
+      "allowAgents": ["main", "my-assistant"]
+    },
+    "recipes": {
+      "allowAgents": ["family-chef"]
     }
   }
 }
