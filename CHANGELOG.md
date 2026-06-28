@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.1] — 2026-06-28
+
+### Fixed
+- Schema validation now correctly rejects `servers: null` with the expected
+  "must have a top-level servers object" error (previously threw a confusing
+  "Cannot convert undefined or null to object" from `Object.keys`)
+
+### Added
+- Vitest unit test suite (26 tests) with 100% line/branch/function coverage
+- `test:coverage` npm script and lcov report via `@vitest/coverage-v8`
+- `CLAUDE.md` — developer quick-reference for AI-assisted development
+- `SECURITY.md` — vulnerability disclosure policy
+- `CONTRIBUTING.md` — setup, test guide, PR checklist, commit style
+- CI: coverage reporting + Codecov upload; README badges (CI, npm, codecov, license)
+
 ## [1.0.0] — 2026-06-27
 
 ### Added
