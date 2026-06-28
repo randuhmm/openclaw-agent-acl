@@ -4,5 +4,10 @@ export default defineConfig({
   test: {
     include: ['index.test.ts'],
     environment: 'node',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['index.ts'],
+    },
   },
 });
