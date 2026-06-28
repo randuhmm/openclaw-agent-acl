@@ -17,7 +17,7 @@ function loadAcl(aclPath) {
   } catch (e) {
     throw new Error(`agent-acl: acl.json at "${aclPath}" is not valid JSON: ${e}`);
   }
-  if (!acl || typeof acl.servers !== "object" || Array.isArray(acl.servers)) {
+  if (!acl || acl.servers == null || typeof acl.servers !== "object" || Array.isArray(acl.servers)) {
     throw new Error(`agent-acl: acl.json must have a top-level "servers" object`);
   }
   return acl;

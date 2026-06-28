@@ -1,5 +1,10 @@
 # openclaw-agent-acl
 
+[![CI](https://github.com/randuhmm/openclaw-agent-acl/actions/workflows/ci.yml/badge.svg)](https://github.com/randuhmm/openclaw-agent-acl/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@randuhmm/openclaw-agent-acl)](https://www.npmjs.com/package/@randuhmm/openclaw-agent-acl)
+[![codecov](https://codecov.io/gh/randuhmm/openclaw-agent-acl/branch/main/graph/badge.svg)](https://codecov.io/gh/randuhmm/openclaw-agent-acl)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 An [OpenClaw](https://openclaw.ai) plugin that restricts MCP server tool access on a per-agent basis using a simple JSON allowlist.
 
 ## Why

@@ -141,6 +141,21 @@ Matches any agent ID starting with `jonny-`, which covers per-user instances lik
 
 ---
 
+## Testing
+
+The plugin ships with a Vitest unit test suite (`index.test.ts`, 26 tests) that covers all branching logic without requiring a running OpenClaw gateway.
+
+**Mocking strategy**: `node:fs` is mocked so `readFileSync` can be controlled per-test. `openclaw/plugin-sdk/plugin-entry` is mocked as a pass-through so `definePluginEntry` returns its argument directly, making the plugin's `register` function accessible. The `before_tool_call` handler is captured from `api.on()` spy calls and invoked directly.
+
+```bash
+npm test               # run all tests once
+npm run test:coverage  # run tests + generate coverage/lcov.info
+```
+
+See `CLAUDE.md` for a compact description of the mock pattern used in tests.
+
+---
+
 ## Contributing
 
 The plugin is a single TypeScript file (`index.ts`) compiled with `tsup` to `dist/index.js`. The `dist/` output is committed to the repo so that `git:`-based installs work without a build step.
