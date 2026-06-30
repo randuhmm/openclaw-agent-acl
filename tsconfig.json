@@ -8,5 +8,13 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["index.ts", "index.test.ts", "vitest.config.ts"]
+  "include": [
+    "index.ts",
+    "acl-store.ts",
+    "http-ui.ts",
+    "index.test.ts",
+    "acl-store.test.ts",
+    "http-ui.test.ts",
+    "vitest.config.ts"
+  ]
 }

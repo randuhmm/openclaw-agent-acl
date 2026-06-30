@@ -112,9 +112,58 @@ openclaw agents list
 
 The default agent ID is `"main"`.
 
+## Web UI
+
+The plugin includes a browser-based permission editor. Once the gateway is running with the plugin enabled, open:
+
+```
+http://localhost:<gateway-port>/agent-acl-ui/
+```
+
+The editor requires an authenticated gateway session (same as any other OpenClaw gateway page). It shows:
+
+- **All configured MCP servers** (from `mcp.servers` in your gateway config), including disabled ones
+- **All configured agents** (from `agents.list`)
+- **Agent IDs present in existing ACL rules** that aren't in config are shown with a "free text" badge
+
+The grid doubles as a **rule builder** — checking an agent's checkbox on a default-open server creates a new rule, unchecking removes it. A per-row "Reset to default-open" button removes the rule entirely. Rule changes saved through the UI take effect immediately without a gateway restart.
+
+### Disabling or moving the UI
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "agent-acl": {
+        "config": {
+          "uiEnabled": false
+        }
+      }
+    }
+  }
+}
+```
+
+Or mount it at a different path:
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "agent-acl": {
+        "config": {
+          "uiPath": "/my-custom-path/"
+        }
+      }
+    }
+  }
+}
+```
+
 ## Updating rules
 
-Edit `acl.json` and restart the gateway to apply changes. No plugin reinstall needed.
+Edit `acl.json` (or use the Web UI) and the gateway will reflect the changes. Changes made through
+the UI take effect immediately. Changes made by hand-editing `acl.json` require a gateway restart.
 
 ## Troubleshooting
 

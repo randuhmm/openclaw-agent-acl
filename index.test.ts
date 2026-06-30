@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('node:fs', () => ({
   readFileSync: vi.fn(),
+  writeFileSync: vi.fn(),
+  renameSync: vi.fn(),
+  unlinkSync: vi.fn(),
 }));
 
 vi.mock('openclaw/plugin-sdk/plugin-entry', () => ({
@@ -27,10 +30,12 @@ function makeMockApi(opts?: { pluginConfig?: Record<string, unknown>; rootDir?: 
   const api = {
     pluginConfig: opts?.pluginConfig,
     rootDir: opts?.rootDir ?? '/fake/root',
+    config: { mcp: { servers: {} }, agents: { list: [] } },
     logger: { info: vi.fn() },
     on: vi.fn((eventName: string, fn: BeforeToolCallHandler) => {
       if (eventName === 'before_tool_call') capturedHandler = fn;
     }),
+    registerHttpRoute: vi.fn(),
   };
   const getHandler = (): BeforeToolCallHandler => {
     if (!capturedHandler) throw new Error('before_tool_call handler was not registered');

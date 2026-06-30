@@ -1,5 +1,29 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- **Web UI**: browser-based permission editor served at `/agent-acl-ui/` (configurable via
+  `uiPath`). Shows all configured MCP servers and agents in a servers × agents grid; lets
+  operators create, edit, and remove ACL rules without hand-editing `acl.json`. Rule changes
+  take effect immediately — no gateway restart required for writes made through the UI.
+- `uiEnabled` plugin config option (boolean, default `true`) to disable the web UI if not needed.
+- `uiPath` plugin config option (string, default `/"/agent-acl-ui/"`) to mount the UI at a
+  custom path.
+- `acl-store.ts` — extracted `AclConfig` type, `loadAcl()`, strict write-path validator
+  (`validateAclWrite`), atomic `writeAclAtomic()` (temp-file + rename, same directory), and
+  `AclStore` class shared between the hook and the HTTP handler.
+- `http-ui.ts` — `registerHttpUi()` that registers a single prefix-matched HTTP route with
+  `auth: "gateway"` / `gatewayRuntimeScopeSurface: "trusted-operator"`, serving static assets
+  and two JSON API endpoints (`GET /api/state`, `PUT /api/acl`).
+- 45 new unit tests across `acl-store.test.ts` and `http-ui.test.ts` (71 total).
+
+### Changed
+- `index.ts` refactored to use `AclStore`; the `before_tool_call` handler reads via
+  `store.get()` so the HTTP write handler can share the same mutable reference.
+- Build script: `--publicDir ui` copies `ui/agent-acl-ui/` assets to `dist/agent-acl-ui/`.
+- `tsconfig.json` extended to cover `acl-store.ts`, `http-ui.ts`, and their test files.
+
 ## [1.0.1] — 2026-06-28
 
 ### Fixed

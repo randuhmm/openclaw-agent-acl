@@ -8,6 +8,16 @@
       "aclPath": {
         "type": "string",
         "description": "Absolute path to acl.json. Defaults to acl.json in the installed plugin root."
+      },
+      "uiEnabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable the browser-based permission editor UI (served at uiPath). Default: true."
+      },
+      "uiPath": {
+        "type": "string",
+        "default": "/agent-acl-ui/",
+        "description": "URL path prefix for the Web UI. Default: /agent-acl-ui/."
       }
     },
     "additionalProperties": false
