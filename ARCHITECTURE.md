@@ -139,6 +139,32 @@ Support glob-style patterns in `allowAgents`/`denyAgents`:
 
 Matches any agent ID starting with `jonny-`, which covers per-user instances like `jonny-assistant`, `jonny-chef`, etc.
 
+### v1.5 — Tool visibility filtering (blocked on OpenClaw core)
+
+**Status: not implementable in this plugin today — requires an OpenClaw core change.**
+
+`before_tool_call` (used today) blocks tool *execution* but the tool's schema is
+already in the LLM's context by the time this hook fires — agents still "see"
+every server/tool they're denied, at full token cost.
+
+Investigation of the OpenClaw plugin SDK (`node_modules/openclaw/dist/**/*.d.ts`)
+found no hook whose result type can filter the tools array sent to the model:
+`before_prompt_build`, `agent_turn_prepare`, and `before_model_resolve` only
+support prompt/context/model overrides; `llm_input` fires after the tools array
+is already built and is observation-only; `before_agent_run` can only pass/block
+the entire run.
+
+The underlying engine already supports visibility-level filtering internally —
+`AgentCommandOpts.toolsAllow` / `GetReplyOptions.toolsAllow` ("runtime tool
+allow-list; when set, only these tools are exposed for this run") — but this is
+only settable by trusted internal callers, not by plugins.
+
+**Upstream ask**: add a `toolsAllow`/`toolsDeny` field to `before_agent_run`'s
+result type (or a new pre-run hook), and have the gateway merge it into the
+`AgentCommandOpts`/`GetReplyOptions` it builds for the run. Once available,
+this plugin would gain a second enforcement layer: filter visibility via the
+new hook in addition to blocking execution via `before_tool_call`.
+
 ---
 
 ## Testing
