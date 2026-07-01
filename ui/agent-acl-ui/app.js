@@ -13,8 +13,33 @@ let state = null;
 /** @type {Record<string, ServerRule | null>} null = default-open (rule removed) */
 let editedServers = {};
 
+const SESSION_KEY = 'openclaw-acl-token';
+
+function loadToken() {
+  const hash = window.location.hash.slice(1);
+  if (hash) {
+    sessionStorage.setItem(SESSION_KEY, hash);
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    return hash;
+  }
+  return sessionStorage.getItem(SESSION_KEY) ?? '';
+}
+
+/** @type {string} */
+let authToken = loadToken();
+
+/**
+ * @param {string} url
+ * @param {RequestInit} [opts]
+ */
+function authFetch(url, opts = {}) {
+  /** @type {Record<string, string>} */
+  const extra = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+  return fetch(url, { ...opts, headers: { ...(opts.headers ?? {}), ...extra } });
+}
+
 async function loadState() {
-  const res = await fetch('api/state');
+  const res = await authFetch('api/state');
   if (!res.ok) throw new Error(`Failed to load state: ${res.status}`);
   return /** @type {State} */ (await res.json());
 }
@@ -198,7 +223,7 @@ async function saveAcl() {
   }
 
   try {
-    const res = await fetch('api/acl', {
+    const res = await authFetch('api/acl', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ servers: merged }),

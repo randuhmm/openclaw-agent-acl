@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-07-01
+
+### Fixed
+- Web UI API calls now include `Authorization: Bearer <token>` headers. Previously all
+  `fetch()` calls to `api/state` and `api/acl` were unauthenticated, causing 401 errors
+  when the UI was accessed via a reverse proxy (nginx, Cloudflare Tunnel, etc.).
+  The token is read from the URL hash on first load (`/agent-acl-ui/#<token>`), stripped
+  from the URL, and persisted to `sessionStorage` for the remainder of the browser session.
+
+## [1.0.1] - 2026-06-xx
+
 ### Added
 - **Web UI**: browser-based permission editor served at `/agent-acl-ui/` (configurable via
   `uiPath`). Shows all configured MCP servers and agents in a servers × agents grid; lets

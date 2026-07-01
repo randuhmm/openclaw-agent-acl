@@ -1,6 +1,6 @@
 {
   "name": "@randuhmm/openclaw-agent-acl",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Per-agent MCP tool access control for OpenClaw",
   "type": "module",
   "scripts": {
