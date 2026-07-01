@@ -4,7 +4,7 @@
   "description": "Per-agent MCP tool access control for OpenClaw",
   "type": "module",
   "scripts": {
-    "build": "tsup index.ts --format esm --outDir dist --external openclaw --external node:fs --external node:path",
+    "build": "tsup index.ts --format esm --outDir dist --external openclaw --external node:fs --external node:path --external node:http --external node:url --publicDir ui",
     "plugin:build": "npm run build",
     "plugin:validate": "clawhub package validate .",
     "typecheck": "tsc --noEmit",
@@ -26,10 +26,10 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
+    "@vitest/coverage-v8": "^2.0.0",
     "tsup": "^8.5.1",
     "typescript": "^5.4.0",
-    "vitest": "^2.0.0",
-    "@vitest/coverage-v8": "^2.0.0"
+    "vitest": "^2.0.0"
   },
   "engines": {
     "node": ">=22.19"

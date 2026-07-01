@@ -44,9 +44,13 @@ const serverName = event.toolName.split('__')[0];
 
 This is safe as long as server names do not themselves contain `__`, which is consistent with OpenClaw's naming conventions.
 
-### ACL config loading
+### ACL config loading and in-memory store
 
-`acl.json` is read once during `register()` via `readFileSync`. The file is parsed and validated at startup — missing file, invalid JSON, or wrong structure all throw with a descriptive error message that surfaces in gateway logs. The parsed config is held in memory for the lifetime of the gateway process.
+`acl.json` is read once during `register()` via `loadAcl()` in `acl-store.ts`. The file is parsed and validated at startup — missing file, invalid JSON, or wrong structure all throw with a descriptive error message that surfaces in gateway logs.
+
+The parsed config is held in an `AclStore` instance (also in `acl-store.ts`) for the lifetime of the gateway process. The `AclStore` exposes `get()` and `update()` so the HTTP write handler can atomically swap the in-memory view after a successful write — this means ACL changes made through the Web UI take effect immediately, without a gateway restart.
+
+This in-memory update is **not** the same as v1.1 hot-reload. v1.1 will watch for *external* edits to `acl.json` (made by hand or another process) via `fs.watch`. The `AclStore` only reflects writes made through the plugin's own HTTP write handler.
 
 ### Default-open policy
 
@@ -141,14 +145,49 @@ Matches any agent ID starting with `jonny-`, which covers per-user instances lik
 
 ---
 
+## Web UI
+
+### HTTP route design
+
+A single prefix-matched route handles all UI traffic (mirrors the bundled `canvas` extension's pattern):
+
+| Path | Method | Purpose |
+|---|---|---|
+| `/agent-acl-ui/` and static sub-paths | GET | Serve `index.html`, `app.js`, `style.css` from `dist/agent-acl-ui/` |
+| `/agent-acl-ui/api/state` | GET | View-model: `{ servers, knownMcpServers, knownAgentIds, aclPath }` |
+| `/agent-acl-ui/api/acl` | PUT | Replace the entire `servers` map in one atomic write |
+
+Route registration parameters: `path: uiPath, match: "prefix", auth: "gateway", gatewayRuntimeScopeSurface: "trusted-operator"`. The `trusted-operator` surface matches the auth tier used by the bundled `admin-http-rpc` extension for config-mutating endpoints.
+
+### View-model assembly (`GET /api/state`)
+
+- **`knownMcpServers`**: sourced from `api.config.mcp?.servers` — every configured MCP server (enabled or disabled, flagged accordingly), unioned with any server name that has an existing ACL rule so a stale rule is never invisible.
+- **`knownAgentIds`**: sourced from `api.config.agents?.list` — every configured agent ID, unioned with any agent ID appearing in an existing `allowAgents` array (so free-text IDs used before the UI existed are never hidden).
+- Individual tools within a server are not available — no plugin-facing tool-catalog API exists in the current OpenClaw SDK. The grid is servers × agents, not tools × agents. Per-tool control is contingent on v1.2 and a yet-unimplemented tool-catalog SDK surface.
+
+### Write path (`PUT /api/acl`)
+
+1. Read and JSON-parse the request body (max 1 MB cap, mirrors `admin-http-rpc`)
+2. `validateAclWrite()` — schema-locked: rejects unknown top-level keys and unknown per-server-rule keys (e.g. `denyAgents`, `tools`) so the UI can never silently accept or drop fields from a future schema version
+3. `writeAclAtomic(aclPath, config)` — write to a temp file in the same directory as `acl.json`, then `renameSync` over the target; readers never observe a partial write
+4. `store.update(config)` — swap the hook's in-memory view so rule changes apply immediately
+
+If step 3 fails, step 4 is never called — the in-memory state and the file remain consistent.
+
+### Static asset serving
+
+Assets are resolved by stripping the `uiPath` prefix, normalizing the result, and checking it stays within `dist/agent-acl-ui/` (path-traversal guard). Static file serving is done directly via `readFileSync` — no streaming, as the UI assets are a few KB each.
+
 ## Testing
 
-The plugin ships with a Vitest unit test suite (`index.test.ts`, 26 tests) that covers all branching logic without requiring a running OpenClaw gateway.
+The plugin ships with a Vitest unit test suite (71 tests across three files) that covers all branching logic without requiring a running OpenClaw gateway.
 
-**Mocking strategy**: `node:fs` is mocked so `readFileSync` can be controlled per-test. `openclaw/plugin-sdk/plugin-entry` is mocked as a pass-through so `definePluginEntry` returns its argument directly, making the plugin's `register` function accessible. The `before_tool_call` handler is captured from `api.on()` spy calls and invoked directly.
+**Mocking strategy**: `node:fs` (`readFileSync`, `writeFileSync`, `renameSync`, `unlinkSync`) is mocked per-test. `openclaw/plugin-sdk/plugin-entry` is a pass-through in `index.test.ts` so `definePluginEntry` returns its argument directly. `node:url`'s `fileURLToPath` returns a fixed path in `http-ui.test.ts` to make the static asset directory deterministic.
+
+The `before_tool_call` handler is captured from `api.on()` spy calls; the HTTP handler is captured from `api.registerHttpRoute()` spy calls. Both are invoked directly in tests.
 
 ```bash
-npm test               # run all tests once
+npm test               # run all 71 tests once
 npm run test:coverage  # run tests + generate coverage/lcov.info
 ```
 

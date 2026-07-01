@@ -1,32 +1,7 @@
 import { definePluginEntry } from 'openclaw/plugin-sdk/plugin-entry';
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-
-interface AclConfig {
-  servers: Record<string, { allowAgents: string[] }>;
-}
-
-function loadAcl(aclPath: string): AclConfig {
-  let raw: string;
-  try {
-    raw = readFileSync(aclPath, 'utf8');
-  } catch {
-    throw new Error(
-      `agent-acl: cannot read acl.json at "${aclPath}". ` +
-      `Create the file or set aclPath in plugin config.`,
-    );
-  }
-  let acl: AclConfig;
-  try {
-    acl = JSON.parse(raw) as AclConfig;
-  } catch (e) {
-    throw new Error(`agent-acl: acl.json at "${aclPath}" is not valid JSON: ${e}`);
-  }
-  if (!acl || acl.servers == null || typeof acl.servers !== 'object' || Array.isArray(acl.servers)) {
-    throw new Error(`agent-acl: acl.json must have a top-level "servers" object`);
-  }
-  return acl;
-}
+import { loadAcl, AclStore } from './acl-store.js';
+import { registerHttpUi } from './http-ui.js';
 
 export default definePluginEntry({
   id: 'agent-acl',
@@ -40,9 +15,11 @@ export default definePluginEntry({
     const acl = loadAcl(aclPath);
     api.logger.info(`agent-acl: loaded ${Object.keys(acl.servers).length} server rule(s) from ${aclPath}`);
 
+    const store = new AclStore(acl);
+
     api.on('before_tool_call', async (event, ctx) => {
       const serverName = event.toolName.split('__')[0];
-      const rule = acl.servers[serverName];
+      const rule = store.get().servers[serverName];
       if (!rule) return { block: false };
 
       const agentId = ctx.agentId ?? 'main';
@@ -54,5 +31,11 @@ export default definePluginEntry({
         blockReason: `Agent "${agentId}" does not have access to "${serverName}" tools`,
       };
     });
+
+    const uiEnabled = (api.pluginConfig?.['uiEnabled'] as boolean | undefined) ?? true;
+    if (uiEnabled) {
+      const uiPath = (api.pluginConfig?.['uiPath'] as string | undefined) ?? '/agent-acl-ui/';
+      registerHttpUi(api, store, aclPath, uiPath);
+    }
   },
 });
